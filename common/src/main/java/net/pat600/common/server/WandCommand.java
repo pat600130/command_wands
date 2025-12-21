@@ -59,7 +59,7 @@ public class WandCommand {
                                             ListTag lore = new ListTag();
                                             lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal("wand command: " + command))));
                                             display.put("Lore", lore);
-                                            tag.put("display", display);
+                                            tag.put("display", display); 
 
                                             player.getInventory().add(stack);
 
