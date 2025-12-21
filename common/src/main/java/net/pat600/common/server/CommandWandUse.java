@@ -20,7 +20,7 @@ public class CommandWandUse{
 
             if (tag != null && tag.contains("StoredCommand")) {
                 String command = tag.getString("StoredCommand");
-                LOG.info("Executing command from wand:{}", command);
+                //LOG.info("Executing command from wand:{}", command);
                 MinecraftServer server = player.getServer();
                 if (server != null) {
                     CommandSourceStack CStack = server.createCommandSourceStack()
