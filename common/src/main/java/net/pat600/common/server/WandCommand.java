@@ -2,12 +2,15 @@ package net.pat600.common.server;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -51,6 +54,12 @@ public class WandCommand {
                                             String command = StringArgumentType.getString(ctx, "command");
                                             CompoundTag tag = stack.getOrCreateTag();
                                             tag.putString("StoredCommand", command);
+
+                                            CompoundTag display = tag.getCompound("display");
+                                            ListTag lore = new ListTag();
+                                            lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal("wand command: " + command))));
+                                            display.put("Lore", lore);
+                                            tag.put("display", display);
 
                                             player.getInventory().add(stack);
 
