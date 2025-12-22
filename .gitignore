@@ -1,8 +1,14 @@
-build/
+/build/
+/run/
+common/run/
+common/build/
+fabric/run/
+fabric/build/
+forge/run/
+forge/build/
 /.gradle
 .idea/
 *.iml
-run/
 .vscode
 .idea
 push.ps1

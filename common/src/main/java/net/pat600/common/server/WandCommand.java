@@ -83,7 +83,7 @@ public class WandCommand {
                                             player.getInventory().add(stack);
 
                                             LOG.info("player {} created wand with command: {}", player.getName(), command);
-
+                                            //ctx.getSource().sendSystemMessage(Component.literal("[player: "+ player.getName() + " created command wand with command: "+ command + "]"));
 
                                             return 0;
                                         })
