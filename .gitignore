@@ -1,12 +1,7 @@
-/build/
-/run/
-common/run/
-common/build/
-fabric/run/
-fabric/build/
-forge/run/
-forge/build/
+build/
+run/
 /.gradle
+.gradle/
 .idea/
 *.iml
 .vscode

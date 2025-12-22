@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-MixinConfigs: command_wand.mixins.json
-
