@@ -6,6 +6,7 @@ import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import static net.pat600.common.CommandWands.LOG;
@@ -18,6 +19,7 @@ public class CommandWandUse{
 
             if (tag != null && tag.contains("StoredCommand")) {
                 String command = tag.getString("StoredCommand");
+                Integer cooldown = tag.getInt("CommandWandCooldown");
                 //LOG.info("Executing command from wand:{}", command);
                 MinecraftServer server = player.getServer();
                 if (server != null) {
@@ -30,6 +32,11 @@ public class CommandWandUse{
                         server.getCommands().getDispatcher().execute(command, CStack);
                     } catch (CommandSyntaxException e) {
                         throw new RuntimeException(e);
+                    }
+
+                    if (cooldown > 0 && player instanceof ServerPlayer serverPlayer) {
+                        serverPlayer.getCooldowns().addCooldown(stack.getItem(), cooldown);
+                        //LOG.info("applied cooldown {} ticks to player {} for item {}", cooldown, serverPlayer.getName().getString(), stack.getItem());
                     }
                 }
 

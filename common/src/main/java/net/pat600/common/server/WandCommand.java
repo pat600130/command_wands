@@ -2,9 +2,8 @@ package net.pat600.common.server;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 
-import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.item.ItemArgument;
@@ -26,9 +25,9 @@ public class WandCommand {
 
     private static boolean isCommandValid(String command, CommandSourceStack source, MinecraftServer server) {
         try {
-            ParseResults<CommandSourceStack> parseResults = server.getCommands().getDispatcher().parse(command, source);
-            return !parseResults.getReader().canRead();
-        } catch (Exception e) {
+            ParseResults<CommandSourceStack> results = server.getCommands().getDispatcher().parse(command, source);
+            return !results.getReader().canRead() || results.getContext().getNodes().isEmpty();
+        } catch (Exception e) {  //testing
             return false;
         }
     }
@@ -47,49 +46,46 @@ public class WandCommand {
                                                 builder
                                         )
                                 )
-                                .then(argument("command", StringArgumentType.greedyString())
-                                        .suggests((ctx, builder) -> {
-                                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                                            CommandDispatcher<CommandSourceStack> dispatcher1 = player.getServer().getCommands().getDispatcher();
+                                .then(argument("cooldown", IntegerArgumentType.integer(0))
+                                    .then(argument("command", StringArgumentType.greedyString())
+                                            .executes(ctx -> {
+                                                ServerPlayer player = ctx.getSource().getPlayerOrException();
+                                                ItemStack stack = ItemArgument.getItem(ctx, "item").createItemStack(1, false);
 
-                                            return SharedSuggestionProvider.suggest(
-                                                    dispatcher1.getRoot().getChildren().stream()
-                                                            .map(CommandNode::getName)
-                                                            .toList(),
-                                                    builder
-                                            );
-                                        })
-                                        .executes(ctx -> { // <-- execute is now on the command argument
+                                                String command = ctx.getArgument("command", String.class);
+                                                int cooldown = ctx.getArgument("cooldown", Integer.class);
 
-                                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                                            ItemStack stack = ItemArgument.getItem(ctx, "item").createItemStack(1, false);
+                                                CompoundTag tag = stack.getOrCreateTag();
+                                                tag.putString("StoredCommand", command);
+                                                if (cooldown > 0)
+                                                    tag.putInt("CommandWandCooldown", cooldown);
 
-                                            String command = StringArgumentType.getString(ctx, "command");
-                                            CompoundTag tag = stack.getOrCreateTag();
-                                            tag.putString("StoredCommand", command);
-
-                                            if (!isCommandValid(command, ctx.getSource(), player.getServer())) {
-                                                ctx.getSource().sendFailure(Component.literal("Warning: The command \"" + command + "\" may be invalid."));
-                                                return 1;
-                                            }
+                                                if (!isCommandValid(command, ctx.getSource(), player.getServer())) {
+                                                    ctx.getSource().sendFailure(Component.literal("Warning: The command \"" + command + "\" may be invalid."));
+                                                    return 1;
+                                                }
 
 
-                                            CompoundTag display = tag.getCompound("display");
-                                            ListTag lore = new ListTag();
-                                            lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal("wand command: " + command))));
-                                            display.put("Lore", lore);
-                                            tag.put("display", display);
 
-                                            player.getInventory().add(stack);
+                                                CompoundTag display = tag.getCompound("display");
+                                                ListTag lore = new ListTag();
+                                                lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal("wand command: " + command))));
+                                                if (cooldown >0)
+                                                    lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal("cooldown: " + cooldown + " ticks"))));
+                                                display.put("Lore", lore);
+                                                tag.put("display", display);
 
-                                            LOG.info("player {} created wand with command: {}", player.getName(), command);
-                                            //ctx.getSource().sendSystemMessage(Component.literal("[player: "+ player.getName() + " created command wand with command: "+ command + "]"));
+                                                player.getInventory().add(stack);
 
-                                            return 0;
-                                        })
+                                                LOG.info("player {} created wand with command: {}", player.getName(), command);
+                                                ctx.getSource().sendSystemMessage(Component.nullToEmpty(Component.literal("["+player.getName()+" created wand with command: " +command)+"]"));
+                                                return 0;
+                                            })
+                                    )
                                 )
                         )
-        );
+
+                );
 
         LOG.info("loaded wand command");
     }
