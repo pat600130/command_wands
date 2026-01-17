@@ -10,9 +10,11 @@ public final class CommandWands {
     public static final Logger LOG = LoggerFactory.getLogger(MOD_ID);
 
     public static void init() {
-        LOG.info("Initializing Command Wands");
-        CommandWandUse.register();
-
+    }
+    public static void serverInit() {
+        LOG.info("Initializing Command Wands server");
+        CommandWandUse.registerClick();
+        CommandWandUse.registerOnTick();
     }
 
 }
