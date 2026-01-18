@@ -24,7 +24,8 @@ public final class CommandWandsForge {
         CommandWands.init();
     }
     private void onServerStarting(ServerStartingEvent event) {
-        CommandWands.serverInit();
+        if (!CommandWands.ServerRunning)
+            CommandWands.serverInit();
     }
 }
 
