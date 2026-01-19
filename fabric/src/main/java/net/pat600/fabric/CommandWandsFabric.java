@@ -14,7 +14,7 @@ public final class CommandWandsFabric implements ModInitializer {
     public void onInitialize() {
         CommandWands.init();
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            if (!server.isDedicatedServer()) {
+            if (!server.isDedicatedServer() && !CommandWands.ServerRunning) {
                 CommandWands.serverInit();
             }
         });
