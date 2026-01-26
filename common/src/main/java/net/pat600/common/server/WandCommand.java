@@ -1,5 +1,8 @@
 package net.pat600.common.server;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.arguments.*;
@@ -47,15 +50,15 @@ public class WandCommand {
                                                 net.minecraft.core.registries.BuiltInRegistries.ITEM.keySet(),
                                                 builder
                                         )
-                                )
-                                .then(argument("cooldown", IntegerArgumentType.integer(0))
-                                        .then(argument("command", StringArgumentType.greedyString())
+                                ).then(argument("json", StringArgumentType.greedyString())
                                                 .executes(ctx -> {
                                                     ServerPlayer player = ctx.getSource().getPlayerOrException();
                                                     ItemStack stack = ItemArgument.getItem(ctx, "item").createItemStack(1, false);
 
-                                                    String command = ctx.getArgument("command", String.class);
-                                                    int cooldown = ctx.getArgument("cooldown", Integer.class);
+                                                    JsonObject json = JsonParser.parseString(ctx.getArgument("json", String.class)).getAsJsonObject();
+
+                                                    String command = json.get("command").getAsString();
+                                                    int cooldown = json.get("cooldown") != null ? json.get("cooldown").getAsInt() : 0;
 
                                                     CompoundTag tag = stack.getOrCreateTag();
                                                     tag.putString("StoredCommand", command);
@@ -66,6 +69,9 @@ public class WandCommand {
                                                         ctx.getSource().sendFailure(Component.literal("Warning: The command \"" + command + "\" may be invalid."));
                                                         return 1;
                                                     }
+
+
+
 
 
 
@@ -99,7 +105,14 @@ public class WandCommand {
                                                     return 0;
                                                 })
                                         )
-                                )
+                                ).executes(
+                                        ctx -> {
+                                            ctx.getSource().sendFailure(Component.literal("Usage: /commandwand <item> <json> \n " +
+                                                    "json options: {\"command\":\"<command>\", \"cooldown\":<ticks>} \n " +
+                                                    "examples: /commandwand minecraft:stick {\"command\":\"say Hello World!\", \"cooldown\":100}" +
+                                                    "  or  /commandwand minecraft:stone {\"command\":\"time set day\"}"));
+                                            return 1;
+                                        }
                         )
 
         );

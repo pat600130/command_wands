@@ -23,13 +23,14 @@ public class CommandWandUse{
                 return CompoundEventResult.pass();
 
             String command = tag.getString("StoredCommand");
-            Integer cooldown = tag.getInt("CommandWandCooldown");
-            Integer cooldownV = tag.getInt("CommandWandCooldownValue");
+            int cooldown = tag.getInt("CommandWandCooldown");
+            int cooldownV = tag.getInt("CommandWandCooldownValue");
             MinecraftServer server = player.getServer();
-            if (!(server != null))
+
+            if (server == null)
                 return CompoundEventResult.pass();
             if (cooldownV > 0){
-                //wLOG.info("command wand on cooldown for player {} for item {}", player.getName().getString(), stack.getItem());
+                //LOG.info("command wand on cooldown for player {} for item {}", player.getName().getString(), stack.getItem());
                 player.sendSystemMessage(Component.literal("Command Wand is on cooldown for " + cooldownV + " ticks."));
                 return CompoundEventResult.pass();
             }
